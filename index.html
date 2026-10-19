@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misi ASK Tingkatan 1 - Aplikasi Pembelajaran Interaktif</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                            dark: '#0f172a',
+                            panel: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            user-select: none;
+        }
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+        .drag-over {
+            border-color: #38bdf8 !important;
+            background-color: rgba(56, 189, 248, 0.15) !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        /* Flowchart animation glow */
+        @keyframes pulse-node {
+            0%, 100% { stroke: #38bdf8; stroke-width: 3; filter: drop-shadow(0 0 5px #38bdf8); }
+            50% { stroke: #f59e0b; stroke-width: 4; filter: drop-shadow(0 0 10px #f59e0b); }
+        }
+        .active-flow-node {
+            animation: pulse-node 1.2s infinite ease-in-out;
+        }
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between custom-scrollbar bg-slate-950 text-slate-100">
+
+    <!-- HEADER APPLIKASI -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-400">
+                    <i data-lucide="cpu" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">
+                        MISI ASK TINGKATAN 1
+                    </h1>
+                    <p class="text-xs text-slate-400">Pengaturcaraan & Pemikiran Komputasional</p>
+                </div>
+            </div>
+
+            <!-- Global Status & Controls -->
+            <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+                <!-- User Badge -->
+                <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg">
+                    <i data-lucide="user" class="w-4 h-4 text-sky-400"></i>
+                    <span id="display-username" class="font-semibold text-slate-200">Murid ASK</span>
+                    <button onclick="changeUsername()" class="text-xs text-slate-400 hover:text-sky-400 underline ml-1">Ubah</button>
+                </div>
+
+                <!-- Mode Indicator -->
+                <div id="mode-badge" class="px-3 py-1.5 rounded-lg font-semibold border flex items-center gap-1.5 bg-amber-500/10 border-amber-500/30 text-amber-400">
+                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                    <span>Mod Latihan</span>
+                </div>
+
+                <!-- Score Counter -->
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                    <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i>
+                    <span>Markah: <strong id="global-score" class="text-emerald-400 text-base">0</strong> / 60</span>
+                </div>
+
+                <!-- Sound Toggle -->
+                <button onclick="toggleAudio()" id="btn-audio" class="p-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-700 transition" title="Nyahaktif / Aktifkan Bunyi">
+                    <i data-lucide="volume-2" id="icon-audio" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Reset Progress Button -->
+                <button onclick="confirmResetAll()" class="p-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 rounded-lg transition" title="Mula Semula">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar & Mission Selector -->
+        <div class="bg-slate-900 border-t border-slate-800/80 px-4 py-2">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-3">
+                <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 min-w-max">
+                    <span id="mission-progress-text">Misi 1 daripada 12</span>
+                    <span class="text-slate-600">|</span>
+                    <span id="section-label" class="text-sky-400">Bahagian B (40M)</span>
+                </div>
+                
+                <!-- Quick Navigation Grid -->
+                <div class="grid grid-cols-12 gap-1 w-full" id="mission-nav-bar">
+                    <!-- Dynamic Mission Buttons generated by JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- UTAMA - KANDUNGAN MISI -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+        <!-- Start / Mode Switch Screen Modal (if needed) or Embedded Container -->
+        <div id="mode-selector-banner" class="mb-6 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 no-print">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-xl text-indigo-400">
+                    <i data-lucide="sliders" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-slate-200">Pilih Mod Permainan</h2>
+                    <p class="text-xs text-slate-400">Mod Latihan memberi petunjuk & jawapan skema. Mod Cabaran memerlukan ujian akhir tanpa bantuan.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="switchMode('LATIHAN')" id="btn-mode-latihan" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> Mod Latihan
+                </button>
+                <button onclick="switchMode('CABARAN')" id="btn-mode-cabaran" class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700">
+                    <i data-lucide="zap" class="w-4 h-4"></i> Mod Cabaran
+                </button>
+            </div>
+        </div>
+
+        <!-- Card Container Misi Current -->
+        <div id="mission-card" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative min-h-[500px] flex flex-col justify-between">
+            
+            <!-- Top Mission Info Bar -->
+            <div>
+                <div class="flex flex-wrap justify-between items-start gap-4 pb-4 mb-6 border-b border-slate-800">
+                    <div>
+                        <div class="flex items-center gap-2 text-xs font-bold text-sky-400 uppercase tracking-wider mb-1">
+                            <span id="mission-badge" class="px-2.5 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/30">MISI 1</span>
+                            <span id="mission-topic" class="text-slate-400">Pemikiran Komputasional</span>
+                        </div>
+                        <h2 id="mission-title" class="text-xl sm:text-2xl font-extrabold text-slate-100">
+                            Empat Teknik Pemikiran Komputasional
+                        </h2>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Nilai Peratusan</span>
+                            <span id="mission-score-display" class="text-lg font-black text-emerald-400">0 / 4 Markah</span>
+                        </div>
+                        <div id="status-icon-container" class="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-500">
+                            <i data-lucide="circle-help" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Petunjuk Konsep (Mod Latihan Sahaja) -->
+                <div id="hint-box" class="hidden mb-6 p-4 rounded-xl bg-indigo-950/40 border border-indigo-800/50 text-indigo-200 text-sm flex items-start gap-3">
+                    <i data-lucide="lightbulb" class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5"></i>
+                    <div>
+                        <strong class="font-semibold block text-indigo-300 mb-0.5">Petunjuk Konsep:</strong>
+                        <span id="hint-text">Gunakan perkataan Teknik di hadapan setiap jawapan anda.</span>
+                    </div>
+                </div>
+
+                <!-- Soalan & Interactive Playground View Container -->
+                <div id="mission-content-area" class="space-y-6">
+                    <!-- Dynamic Interactive Content Rendered via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Bottom Navigation & Action Buttons -->
+            <div class="pt-6 mt-8 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4 no-print">
+                <div class="flex items-center gap-2">
+                    <button onclick="prevMission()" id="btn-prev" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-semibold flex items-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Sebelumnya
+                    </button>
+                    <button onclick="nextMission()" id="btn-next" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-semibold flex items-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                        Seterusnya <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Reset Current Mission Button -->
+                    <button onclick="resetCurrentMission()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm font-semibold flex items-center gap-2 transition">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Cuba Lagi
+                    </button>
+
+                    <!-- Show Answer (Mod Latihan Sahaja) -->
+                    <button onclick="revealSkemaAnswer()" id="btn-schema" class="hidden px-4 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-sm font-semibold flex items-center gap-2 transition">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Lihat Jawapan Skema
+                    </button>
+
+                    <!-- Check / Submit Mission Button -->
+                    <button onclick="checkCurrentMission()" id="btn-check" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> Semak Jawapan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORT CARD VIEW CONTAINER (Shown after Misi 12 or via direct nav) -->
+        <div id="report-card-section" class="hidden mt-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+            <!-- Dynamic Report Card HTML rendered by JS -->
+        </div>
+    </main>
+
+    <!-- MODAL CONFIRMATION & DIALOG -->
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 id="modal-title" class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="text-amber-400 w-5 h-5"></i> Pengesahan
+            </h3>
+            <p id="modal-body" class="text-sm text-slate-300">Adakah anda pasti untuk meneruskan tindakan ini?</p>
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-semibold">Batal</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-500 text-xs font-semibold">Teruskan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p>© 2026 Misi ASK Tingkatan 1 — Kurikulum Standard Sekolah Menengah (KSSM)</p>
+            <p class="text-slate-400">Dikembangkan untuk Kegunaan Gemini Canvas Interaktif</p>
+        </div>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           1. DATA PERATURAN TETAP, SOALAN & SKEMA (QUESTION_DATA, ANSWER_KEY)
+           ========================================================================== */
+
+        const APP_STATE = {
+            currentMission: 1, // 1 - 12
+            mode: 'LATIHAN',  // LATIHAN | CABARAN
+            username: 'Murid ASK',
+            audioEnabled: true,
+            
+            // Rekod Simpanan Jawapan & Markah
+            userAnswers: {},
+            firstAttempts: {},
+            assistedItems: {}, // Menandakan latihan berbantu jika jawapan skema dilihat
+            teacherReviewItems: {},
+            scores: {}
+        };
+
+        const QUESTION_DATA = {
+            1: {
+                section: 'Bahagian B',
+                title: 'Pemikiran Komputasional dalam Perancangan',
+                maxScore: 4,
+                hint: 'Pastikan setiap jawapan menggunakan kata kunci wajib "Teknik" di hadapan.',
+                type: 'FILL_FOUR_TEKNIK'
+            },
+            2: {
+                section: 'Bahagian B',
+                title: 'Penukaran Nombor Perduaan kepada Perpuluhan',
+                maxScore: 4,
+                hint: 'Jumlahkan nilai tempat bagi setiap lampu yang menyala (digit 1).',
+                type: 'BINARY_CALC'
+            },
+            3: {
+                section: 'Bahagian B',
+                title: 'Pengelasan Konsep Imej Digital',
+                maxScore: 4,
+                hint: 'Seret setiap pernyataan ke kategori Benar atau Palsu yang tepat.',
+                type: 'DRAG_BENAR_PALSU'
+            },
+            4: {
+                section: 'Bahagian B',
+                title: 'Padanan Format Fail Imej',
+                maxScore: 4,
+                hint: 'Sesuai untuk percutian (JPEG), animasi (GIF), cetakan (TIFF), mentah/bitmap (BMP).',
+                type: 'MATCH_IMAGE_FORMATS'
+            },
+            5: {
+                section: 'Bahagian B',
+                title: 'Pseudokod Struktur Kawalan Pilihan',
+                maxScore: 4,
+                hint: 'Susun blok syarat JIKA, JIKA TIDAK dan mesej paparan dengan betul.',
+                type: 'SORT_PSEUDOCODE'
+            },
+            6: {
+                section: 'Bahagian B',
+                title: 'Struktur Kawalan Ulangan UNTUK',
+                maxScore: 4,
+                hint: 'Setkan pembilang -> Uji pembilang -> Papar -> Tambah pembilang.',
+                type: 'SORT_FOR_LOOP'
+            },
+            7: {
+                section: 'Bahagian B',
+                title: 'Operator Matematik dalam Atur Cara',
+                maxScore: 4,
+                hint: 'Gunakan simbol khas pengaturcaraan seperti * untuk darab dan / untuk bahagi.',
+                type: 'FILL_OPERATORS'
+            },
+            8: {
+                section: 'Bahagian B',
+                title: 'Pengelasan Jenis Ralat Atur Cara',
+                maxScore: 4,
+                hint: 'Ralat Sintaks (tatabahasa), Logik (salah pengiraan), Masa Larian (pembahagian sifar).',
+                type: 'DRAG_ERRORS'
+            },
+            9: {
+                section: 'Bahagian B',
+                title: 'Padanan Tag Heading HTML',
+                maxScore: 4,
+                hint: '<h1> adalah saiz tajuk paling besar manakala <h6> adalah paling kecil.',
+                type: 'MATCH_HTML_HEADINGS'
+            },
+            10: {
+                section: 'Bahagian B',
+                title: 'Menu Tarik-Turun (Pull-Down) HTML',
+                maxScore: 4,
+                hint: 'Lengkapkan elemen <select>, <option>, dan tag penutup HTML.',
+                type: 'FILL_HTML_SELECT'
+            },
+            11: {
+                section: 'Bahagian C',
+                title: 'Pengiraaan Saiz Fail Imej Skala Kelabu',
+                maxScore: 10,
+                hint: 'Langkah 1: Cari Lebar & Panjang piksel. Langkah 2: Darabkan untuk jumlah piksel. Langkah 3: Tukar ke Bit, Bait dan KB (1 KB = 1024 Bait).',
+                type: 'CALC_FILE_SIZE'
+            },
+            12: {
+                section: 'Bahagian C',
+                title: 'Pengesanan Ralat & Pembinaan Carta Alir Suhu',
+                maxScore: 10,
+                hint: '(a) Cari baris ralat logik. (b) Seret 8 blok ke dalam rangka carta alir siap.',
+                type: 'FLOWCHART_MISSION'
+            }
+        };
+
+        const ANSWER_KEY = {
+            1: ["teknik leraian", "teknik pengecaman corak", "teknik peniskalaan", "teknik pengitlakan"],
+            2: { a: 85, b: 154, c: 51, d: 196 },
+            3: { 1: true, 2: true, 3: false, 4: true },
+            4: {
+                s1: 'JPEG', // foto percutian web
+                s2: 'GIF',  // animasi ringkas
+                s3: 'TIFF', // cetakan bercetak
+                s4: 'BMP'   // bitmap tanpa pemampatan
+            },
+            5: ['D', 'C', 'B', 'A'],
+            6: ['S', 'Q', 'P', 'R'],
+            7: { plus: '+', minus: '-', multiply: '*', divide: '/' },
+            8: {
+                1: 'Sintaks',
+                2: 'Logik',
+                3: 'Masa Larian',
+                4: 'Logik'
+            },
+            9: {
+                c: '<h3>Galeri Sains</h3>',
+                a: '<h1>Galeri Sains</h1>',
+                d: '<h4>Galeri Sains</h4>',
+                b: '<h2>Galeri Sains</h2>'
+            },
+            10: {
+                i: '<p>Pilih warna:</p>',
+                ii: '<select>',
+                iii: '<option value="Hijau">Hijau</option>',
+                iv: '</body>'
+            },
+            11: {
+                a_i: 8,
+                a_ii: 1024,
+                b_lebar: 640,
+                b_panjang: 480,
+                b_jumlah_piksel: 307200,
+                b_bit: 2457600,
+                b_bait: 307200,
+                b_kb: 300
+            },
+            12: {
+                line: 5,
+                errorType: 'Ralat logik',
+                flowchartSlots: {
+                    N1: 'Mula',
+                    N2: 'Masukkan suhu',
+                    N3: 'Suhu > 30?',
+                    N4: 'Paparkan "Panas"',
+                    N5: 'Suhu >= 24?',
+                    N6: 'Paparkan "Selesa"',
+                    N7: 'Paparkan "Sejuk"',
+                    N8: 'Tamat'
+                }
+            }
+        };
+
+        // FLOWCHART GRAPH & TEST PATHS SPECIFICATION (MISI 12)
+        const FLOWCHART_GRAPH = {
+            nodes: ['N1', 'N2', 'N3', 'N4', 'N5', 'N6', 'N7', 'N8'],
+            edges: [
+                { from: 'N1', to: 'N2', label: '' },
+                { from: 'N2', to: 'N3', label: '' },
+                { from: 'N3', to: 'N4', label: 'Ya' },
+                { from: 'N3', to: 'N5', label: 'Tidak' },
+                { from: 'N4', to: 'N8', label: '' },
+                { from: 'N5', to: 'N6', label: 'Ya' },
+                { from: 'N5', to: 'N7', label: 'Tidak' },
+                { from: 'N6', to: 'N8', label: '' },
+                { from: 'N7', to: 'N8', label: '' }
+            ]
+        };
+
+        const FLOWCHART_TESTS = [
+            { temp: 23, path: ['N1', 'N2', 'N3', 'N5', 'N7', 'N8'], output: 'Sejuk' },
+            { temp: 24, path: ['N1', 'N2', 'N3', 'N5', 'N6', 'N8'], output: 'Selesa' },
+            { temp: 30, path: ['N1', 'N2', 'N3', 'N5', 'N6', 'N8'], output: 'Selesa' },
+            { temp: 31, path: ['N1', 'N2', 'N3', 'N4', 'N8'], output: 'Panas' }
+        ];
+
+        /* ==========================================================================
+           2. AUDIO SYNTHESIZER (WEB AUDIO API - NO EXTERNAL ASSETS)
+           ========================================================================== */
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+            },
+            playSuccess() {
+                if (!APP_STATE.audioEnabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3); // C6
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            },
+            playError() {
+                if (!APP_STATE.audioEnabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.setValueAtTime(180, now + 0.15);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            },
+            playClick() {
+                if (!APP_STATE.audioEnabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        };
+
+        function toggleAudio() {
+            APP_STATE.audioEnabled = !APP_STATE.audioEnabled;
+            const icon = document.getElementById('icon-audio');
+            if (APP_STATE.audioEnabled) {
+                icon.setAttribute('data-lucide', 'volume-2');
+                showToast('Bunyi diaktifkan');
+            } else {
+                icon.setAttribute('data-lucide', 'volume-x');
+                showToast('Bunyi dinyahaktifkan');
+            }
+            lucide.createIcons();
+            saveLocalProgress();
+        }
+
+        /* ==========================================================================
+           3. APPLICATION INITIALIZATION & NAVIGATION LOGIC
+           ========================================================================== */
+        window.onload = function () {
+            loadLocalProgress();
+            renderNavigationGrid();
+            loadMission(APP_STATE.currentMission);
+            lucide.createIcons();
+        };
+
+        function renderNavigationGrid() {
+            const container = document.getElementById('mission-nav-bar');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 12; i++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => jumpToMission(i);
+                
+                const isCurrent = i === APP_STATE.currentMission;
+                const hasScore = APP_STATE.scores[i] !== undefined;
+                const max = QUESTION_DATA[i].maxScore;
+                const score = APP_STATE.scores[i] || 0;
+                
+                let statusBg = 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700';
+                if (isCurrent) {
+                    statusBg = 'bg-sky-500 text-slate-950 font-bold border-sky-400 shadow-md shadow-sky-500/20';
+                } else if (hasScore) {
+                    if (score === max) {
+                        statusBg = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300';
+                    } else if (score > 0) {
+                        statusBg = 'bg-amber-500/20 border-amber-500/50 text-amber-300';
+                    } else {
+                        statusBg = 'bg-rose-500/20 border-rose-500/50 text-rose-300';
+                    }
+                }
+
+                btn.className = `py-1.5 px-1 rounded-lg border text-center font-bold text-xs transition flex flex-col items-center justify-center ${statusBg}`;
+                btn.innerHTML = `<span>M${i}</span>`;
+                container.appendChild(btn);
+            }
+
+            calculateGlobalScore();
+        }
+
+        function calculateGlobalScore() {
+            let total = 0;
+            for (let i = 1; i <= 12; i++) {
+                if (APP_STATE.scores[i] !== undefined) {
+                    total += APP_STATE.scores[i];
+                }
+            }
+            document.getElementById('global-score').innerText = total;
+        }
+
+        function switchMode(newMode) {
+            APP_STATE.mode = newMode;
+            const btnLatihan = document.getElementById('btn-mode-latihan');
+            const btnCabaran = document.getElementById('btn-mode-cabaran');
+            const badge = document.getElementById('mode-badge');
+
+            if (newMode === 'LATIHAN') {
+                btnLatihan.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20';
+                btnCabaran.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700';
+                badge.className = 'px-3 py-1.5 rounded-lg font-semibold border flex items-center gap-1.5 bg-amber-500/10 border-amber-500/30 text-amber-400';
+                badge.innerHTML = '<i data-lucide="book-open" class="w-4 h-4"></i> <span>Mod Latihan</span>';
+            } else {
+                btnCabaran.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/20';
+                btnLatihan.className = 'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700';
+                badge.className = 'px-3 py-1.5 rounded-lg font-semibold border flex items-center gap-1.5 bg-sky-500/10 border-sky-500/30 text-sky-400';
+                badge.innerHTML = '<i data-lucide="zap" class="w-4 h-4"></i> <span>Mod Cabaran</span>';
+            }
+            lucide.createIcons();
+            loadMission(APP_STATE.currentMission);
+        }
+
+        function jumpToMission(num) {
+            AudioFX.playClick();
+            saveCurrentInputs();
+            APP_STATE.currentMission = num;
+            renderNavigationGrid();
+            loadMission(num);
+        }
+
+        function prevMission() {
+            if (APP_STATE.currentMission > 1) {
+                jumpToMission(APP_STATE.currentMission - 1);
+            }
+        }
+
+        function nextMission() {
+            if (APP_STATE.currentMission < 12) {
+                jumpToMission(APP_STATE.currentMission + 1);
+            } else {
+                showReportCard();
+            }
+        }
+
+        function loadMission(mNum) {
+            // Hide Report Card if showing
+            document.getElementById('report-card-section').classList.add('hidden');
+            document.getElementById('mission-card').classList.remove('hidden');
+
+            const mData = QUESTION_DATA[mNum];
+            document.getElementById('mission-badge').innerText = `MISI ${mNum}`;
+            document.getElementById('mission-topic').innerText = mData.section;
+            document.getElementById('mission-title').innerText = mData.title;
+            document.getElementById('mission-progress-text').innerText = `Misi ${mNum} daripada 12`;
+            document.getElementById('section-label').innerText = mData.section + ` (${mNum <= 10 ? '40 Markah' : '20 Markah'})`;
+
+            // Score Display
+            const currScore = APP_STATE.scores[mNum] !== undefined ? APP_STATE.scores[mNum] : 0;
+            document.getElementById('mission-score-display').innerText = `${currScore} / ${mData.maxScore} Markah`;
+
+            // Hint Box Logic
+            const hintBox = document.getElementById('hint-box');
+            if (APP_STATE.mode === 'LATIHAN') {
+                hintBox.classList.remove('hidden');
+                document.getElementById('hint-text').innerText = mData.hint;
+            } else {
+                hintBox.classList.add('hidden');
+            }
+
+            // Schema Button Logic
+            const btnSchema = document.getElementById('btn-schema');
+            if (APP_STATE.mode === 'LATIHAN' && APP_STATE.firstAttempts[mNum]) {
+                btnSchema.classList.remove('hidden');
+            } else {
+                btnSchema.classList.add('hidden');
+            }
+
+            // Navigation buttons enabled status
+            document.getElementById('btn-prev').disabled = (mNum === 1);
+            
+            // Render Content Dynamic
+            const contentArea = document.getElementById('mission-content-area');
+            contentArea.innerHTML = '';
+            renderMissionUI(mNum, contentArea);
+
+            lucide.createIcons();
+        }
+
+        /* ==========================================================================
+           4. DYNAMIC INTERACTIVE MISSION UI RENDERERS
+           ========================================================================== */
+
+        function renderMissionUI(mNum, container) {
+            switch (mNum) {
+                case 1: renderMisi1(container); break;
+                case 2: renderMisi2(container); break;
+                case 3: renderMisi3(container); break;
+                case 4: renderMisi4(container); break;
+                case 5: renderMisi5(container); break;
+                case 6: renderMisi6(container); break;
+                case 7: renderMisi7(container); break;
+                case 8: renderMisi8(container); break;
+                case 9: renderMisi9(container); break;
+                case 10: renderMisi10(container); break;
+                case 11: renderMisi11(container); break;
+                case 12: renderMisi12(container); break;
+            }
+        }
+
+        /* --- MISI 1: PEMIKIRAN KOMPUTASIONAL --- */
+        function renderMisi1(container) {
+            const saved = APP_STATE.userAnswers[1] || ['', '', '', ''];
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Sebuah kelab ingin menganjurkan hari jualan amal. Nyatakan empat teknik pemikiran komputasional yang boleh digunakan untuk merancang aktiviti tersebut."
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${[0,1,2,3].map(i => `
+                            <div class="space-y-1">
+                                <label class="text-xs text-slate-400 font-semibold">Teknik ${i+1}:</label>
+                                <input type="text" id="m1-input-${i}" value="${escapeHtml(saved[i]||'')}" placeholder="Cth: Teknik leraian" 
+                                    class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-4 py-3 text-sm text-slate-100 outline-none transition">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div id="m1-feedback" class="text-xs text-amber-400 hidden p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl"></div>
+                </div>
+            `;
+        }
+
+        /* --- MISI 2: SISTEM NOMBOR PERDUAAN --- */
+        function renderMisi2(container) {
+            const saved = APP_STATE.userAnswers[2] || { a: '', b: '', c: '', d: '' };
+            const items = [
+                { id: 'a', bin: '01010101', calc: '64 + 16 + 4 + 1' },
+                { id: 'b', bin: '10011010', calc: '128 + 16 + 8 + 2' },
+                { id: 'c', bin: '00110011', calc: '32 + 16 + 2 + 1' },
+                { id: 'd', bin: '11000100', calc: '128 + 64 + 4' }
+            ];
+            const weights = [128, 64, 32, 16, 8, 4, 2, 1];
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Lampu yang menyala (1) mewakili bit aktif dan lampu yang padam (0) mewakili bit tidak aktif. Hitung nilai perpuluhan bagi setiap susunan berikut."
+                    </p>
+                    <div class="space-y-6">
+                        ${items.map(item => `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-sky-400">Soalan (${item.id})</span>
+                                    <span class="text-xs text-slate-500">Perduaan: ${item.bin}</span>
+                                </div>
+                                <!-- Lamp Row -->
+                                <div class="grid grid-cols-8 gap-1 sm:gap-2 text-center">
+                                    ${item.bin.split('').map((bit, idx) => `
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-[10px] text-slate-500">${weights[idx]}</span>
+                                            <div class="w-8 h-8 sm:w-10 sm:h-10 my-1 rounded-lg flex items-center justify-center font-bold text-xs ${bit === '1' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30' : 'bg-slate-800 text-slate-600 border border-slate-700'}">
+                                                <i data-lucide="${bit === '1' ? 'zap' : 'moon'}" class="w-4 h-4"></i>
+                                            </div>
+                                            <span class="text-xs font-mono font-bold ${bit === '1' ? 'text-amber-400' : 'text-slate-600'}">${bit}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="flex items-center gap-3 pt-2">
+                                    <span class="text-xs text-slate-400">Nilai Perpuluhan:</span>
+                                    <input type="number" id="m2-input-${item.id}" value="${saved[item.id]||''}" placeholder="Masukkan jawapan" 
+                                        class="w-40 bg-slate-900 border border-slate-700 focus:border-sky-500 rounded-lg px-3 py-1.5 text-sm text-slate-100 outline-none">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- MISI 3: IMEJ DIGITAL (BENAR / PALSU) --- */
+        function renderMisi3(container) {
+            const saved = APP_STATE.userAnswers[3] || { benar: [], palsu: [] };
+            const stmts = [
+                { id: 1, text: "1. Imej dengan lebih banyak piksel lazimnya mempunyai lebih banyak perincian." },
+                { id: 2, text: "2. Resolusi imej boleh dinyatakan dalam dpi." },
+                { id: 3, text: "3. Imej berwarna 24 bit menggunakan kurang bit bagi setiap piksel berbanding imej skala kelabu 8 bit." },
+                { id: 4, text: "4. Bagi dimensi dan kedalaman bit yang sama, jumlah bit imej mentah tidak berubah apabila nama fail ditukar." }
+            ];
+
+            // Get unplaced cards
+            const placedIds = [...(saved.benar || []), ...(saved.palsu || [])];
+            const unplaced = stmts.filter(s => !placedIds.includes(s.id));
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Tandakan BENAR atau PALSU bagi setiap pernyataan dengan menyeret atau memilih kategori yang betul."
+                    </p>
+                    
+                    <!-- Unplaced Pool -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 min-h-[100px]" id="m3-pool" ondragover="allowDrop(event)" ondrop="dropM3(event, 'pool')">
+                        <span class="text-xs text-slate-500 font-semibold block mb-2">Pernyataan untuk diagihkan:</span>
+                        <div class="space-y-2">
+                            ${unplaced.map(s => `
+                                <div id="m3-card-${s.id}" draggable="true" ondragstart="dragM3(event, ${s.id})" 
+                                    class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 cursor-grab active:cursor-grabbing flex justify-between items-center">
+                                    <span>${s.text}</span>
+                                    <div class="flex gap-1">
+                                        <button onclick="moveM3(${s.id}, 'benar')" class="px-2 py-1 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded text-[10px]">Benar</button>
+                                        <button onclick="moveM3(${s.id}, 'palsu')" class="px-2 py-1 bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 rounded text-[10px]">Palsu</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Drop Zones -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- BENAR ZONE -->
+                        <div class="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-xl min-h-[150px]" ondragover="allowDrop(event)" ondrop="dropM3(event, 'benar')">
+                            <h4 class="text-xs font-bold text-emerald-400 mb-2 flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> Kategori BENAR</h4>
+                            <div class="space-y-2" id="m3-zone-benar">
+                                ${(saved.benar || []).map(id => {
+                                    const s = stmts.find(x => x.id === id);
+                                    return `
+                                        <div id="m3-card-${s.id}" draggable="true" ondragstart="dragM3(event, ${s.id})" class="p-2.5 bg-slate-800 border border-emerald-500/40 rounded-lg text-xs flex justify-between items-center">
+                                            <span>${s.text}</span>
+                                            <button onclick="moveM3(${s.id}, 'pool')" class="text-slate-400 hover:text-rose-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- PALSU ZONE -->
+                        <div class="bg-rose-950/20 border border-rose-500/30 p-4 rounded-xl min-h-[150px]" ondragover="allowDrop(event)" ondrop="dropM3(event, 'palsu')">
+                            <h4 class="text-xs font-bold text-rose-400 mb-2 flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> Kategori PALSU</h4>
+                            <div class="space-y-2" id="m3-zone-palsu">
+                                ${(saved.palsu || []).map(id => {
+                                    const s = stmts.find(x => x.id === id);
+                                    return `
+                                        <div id="m3-card-${s.id}" draggable="true" ondragstart="dragM3(event, ${s.id})" class="p-2.5 bg-slate-800 border border-rose-500/40 rounded-lg text-xs flex justify-between items-center">
+                                            <span>${s.text}</span>
+                                            <button onclick="moveM3(${s.id}, 'pool')" class="text-slate-400 hover:text-rose-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Misi 3 Drag and Button Event Helpers
+        function dragM3(e, id) { e.dataTransfer.setData('text/plain', id); }
+        function allowDrop(e) { e.preventDefault(); }
+        function dropM3(e, targetZone) {
+            e.preventDefault();
+            const id = parseInt(e.dataTransfer.getData('text/plain'));
+            if (id) moveM3(id, targetZone);
+        }
+        function moveM3(id, targetZone) {
+            const current = APP_STATE.userAnswers[3] || { benar: [], palsu: [] };
+            current.benar = (current.benar || []).filter(x => x !== id);
+            current.palsu = (current.palsu || []).filter(x => x !== id);
+            if (targetZone === 'benar') current.benar.push(id);
+            if (targetZone === 'palsu') current.palsu.push(id);
+            APP_STATE.userAnswers[3] = current;
+            renderMisi3(document.getElementById('mission-content-area'));
+            lucide.createIcons();
+        }
+
+        /* --- MISI 4: FORMAT FAIL IMEJ --- */
+        function renderMisi4(container) {
+            const saved = APP_STATE.userAnswers[4] || { s1: '', s2: '', s3: '', s4: '' };
+            const situations = [
+                { id: 's1', text: 'Foto percutian yang hendak dikongsi melalui laman web.' },
+                { id: 's2', text: 'Imej animasi ringkas untuk ikon bergerak.' },
+                { id: 's3', text: 'Fail imej berkualiti tinggi untuk kerja penerbitan bercetak.' },
+                { id: 's4', text: 'Imej bitmap ringkas yang lazimnya disimpan tanpa pemampatan.' }
+            ];
+            const formats = ['JPEG', 'GIF', 'TIFF', 'BMP'];
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Padankan format fail yang paling sesuai bagi setiap situasi berikut. Setiap format digunakan sekali sahaja."
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${situations.map(sit => `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 flex flex-col justify-between">
+                                <p class="text-xs text-slate-300 font-medium">${sit.text}</p>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-slate-500">Format:</span>
+                                    <select id="m4-select-${sit.id}" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-sky-400 font-bold outline-none focus:border-sky-500">
+                                        <option value="">-- Pilih Format --</option>
+                                        ${formats.map(fmt => `
+                                            <option value="${fmt}" ${saved[sit.id] === fmt ? 'selected' : ''}>${fmt}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- MISI 5: STRUKTUR KAWALAN PILIHAN --- */
+        function renderMisi5(container) {
+            const saved = APP_STATE.userAnswers[5] || ['A', 'B', 'C', 'D'];
+            const blocks = {
+                'A': 'PAPARKAN "Perlu dicas"',
+                'B': 'JIKA TIDAK',
+                'C': 'PAPARKAN "Bateri mencukupi"',
+                'D': 'JIKA aras bateri >= 30'
+            };
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Susun empat blok berikut untuk melengkapkan pseudokod status bateri peranti."
+                    </p>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 code-font text-xs space-y-2">
+                        <div class="text-slate-500">MULA</div>
+                        <div class="text-slate-500">MASUKKAN aras bateri</div>
+                        
+                        <!-- Reorderable Container -->
+                        <div id="m5-reorder-list" class="space-y-2 py-2">
+                            ${saved.map((key, index) => `
+                                <div id="m5-item-${key}" draggable="true" ondragstart="dragM5(event, ${index})" ondragover="allowDrop(event)" ondrop="dropM5(event, ${index})"
+                                    class="p-3 bg-slate-800 border border-sky-500/40 rounded-lg text-sky-300 font-bold flex justify-between items-center cursor-grab">
+                                    <span>${blocks[key]}</span>
+                                    <div class="flex gap-1 no-print">
+                                        <button onclick="moveM5(${index}, -1)" class="p-1 hover:bg-slate-700 rounded text-slate-400"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+                                        <button onclick="moveM5(${index}, 1)" class="p-1 hover:bg-slate-700 rounded text-slate-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="text-slate-500">TAMAT JIKA</div>
+                        <div class="text-slate-500">TAMAT</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let m5DragIndex = null;
+        function dragM5(e, index) { m5DragIndex = index; }
+        function dropM5(e, targetIndex) {
+            e.preventDefault();
+            if (m5DragIndex === null) return;
+            const saved = APP_STATE.userAnswers[5] || ['A', 'B', 'C', 'D'];
+            const item = saved.splice(m5DragIndex, 1)[0];
+            saved.splice(targetIndex, 0, item);
+            APP_STATE.userAnswers[5] = saved;
+            renderMisi5(document.getElementById('mission-content-area'));
+            lucide.createIcons();
+        }
+        function moveM5(index, direction) {
+            const saved = APP_STATE.userAnswers[5] || ['A', 'B', 'C', 'D'];
+            const target = index + direction;
+            if (target < 0 || target >= saved.length) return;
+            const temp = saved[index];
+            saved[index] = saved[target];
+            saved[target] = temp;
+            APP_STATE.userAnswers[5] = saved;
+            renderMisi5(document.getElementById('mission-content-area'));
+            lucide.createIcons();
+        }
+
+        /* --- MISI 6: STRUKTUR KAWALAN ULANGAN --- */
+        function renderMisi6(container) {
+            const saved = APP_STATE.userAnswers[6] || ['P', 'Q', 'R', 'S'];
+            const blocks = {
+                'P': 'Papar nilai pembilang',
+                'Q': 'Uji pembilang terhadap nilai akhir',
+                'R': 'Tambah nilai pembilang sebanyak 1',
+                'S': 'Setkan pembilang kepada 1'
+            };
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Susun langkah bagi ulangan UNTUK yang memaparkan nombor 1 hingga 5."
+                    </p>
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                        <div class="text-slate-500 font-bold">1. Mula</div>
+                        <div class="space-y-2 py-2">
+                            ${saved.map((key, index) => `
+                                <div id="m6-item-${key}" draggable="true" ondragstart="dragM6(event, ${index})" ondragover="allowDrop(event)" ondrop="dropM6(event, ${index})"
+                                    class="p-3 bg-slate-800 border border-emerald-500/40 rounded-lg text-emerald-300 font-semibold flex justify-between items-center cursor-grab">
+                                    <span>${index + 2}. ${blocks[key]}</span>
+                                    <div class="flex gap-1">
+                                        <button onclick="moveM6(${index}, -1)" class="p-1 hover:bg-slate-700 rounded text-slate-400"><i data-lucide="chevron-up" class="w-4 h-4"></i></button>
+                                        <button onclick="moveM6(${index}, 1)" class="p-1 hover:bg-slate-700 rounded text-slate-400"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="text-slate-500 font-bold">6. Tamat</div>
+                    </div>
+
+                    <!-- Animation Area -->
+                    <div id="m6-anim-area" class="hidden p-4 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-2">
+                        <span class="text-xs text-sky-400 font-bold block">Simulasi Ulangan UNTUK:</span>
+                        <div id="m6-counter-display" class="text-3xl font-black text-amber-400 font-mono">0</div>
+                        <p id="m6-anim-status" class="text-xs text-slate-400">Menjalankan ulangan...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        let m6DragIndex = null;
+        function dragM6(e, index) { m6DragIndex = index; }
+        function dropM6(e, targetIndex) {
+            e.preventDefault();
+            if (m6DragIndex === null) return;
+            const saved = APP_STATE.userAnswers[6] || ['P', 'Q', 'R', 'S'];
+            const item = saved.splice(m6DragIndex, 1)[0];
+            saved.splice(targetIndex, 0, item);
+            APP_STATE.userAnswers[6] = saved;
+            renderMisi6(document.getElementById('mission-content-area'));
+            lucide.createIcons();
+        }
+        function moveM6(index, direction) {
+            const saved = APP_STATE.userAnswers[6] || ['P', 'Q', 'R', 'S'];
+            const target = index + direction;
+            if (target < 0 || target >= saved.length) return;
+            const temp = saved[index];
+            saved[index] = saved[target];
+            saved[target] = temp;
+            APP_STATE.userAnswers[6] = saved;
+            renderMisi6(document.getElementById('mission-content-area'));
+            lucide.createIcons();
+        }
+
+        /* --- MISI 7: OPERATOR MATEMATIK --- */
+        function renderMisi7(container) {
+            const saved = APP_STATE.userAnswers[7] || { plus: '', minus: '', multiply: '', divide: '' };
+            const ops = [
+                { id: 'plus', label: 'Tambah (+)' },
+                { id: 'minus', label: 'Tolak (-)' },
+                { id: 'multiply', label: 'Darab (*)' },
+                { id: 'divide', label: 'Bahagi (/)' }
+            ];
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Tuliskan simbol operator yang digunakan dalam atur cara bagi setiap operasi berikut. (Catatan: Simbol × dan ÷ tidak diterima)."
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        ${ops.map(o => `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                                <span class="text-sm text-slate-200 font-semibold">${o.label}:</span>
+                                <input type="text" id="m7-input-${o.id}" maxlength="2" value="${escapeHtml(saved[o.id]||'')}" placeholder="Simbol"
+                                    class="w-16 bg-slate-900 border border-slate-700 focus:border-sky-500 rounded-lg px-3 py-2 text-center text-lg font-mono text-amber-400 font-bold outline-none">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- MISI 8: RALAT ATUR CARA --- */
+        function renderMisi8(container) {
+            const saved = APP_STATE.userAnswers[8] || { 1: '', 2: '', 3: '', 4: '' };
+            const errors = ['Ralat sintaks', 'Ralat logik', 'Ralat masa larian'];
+            const items = [
+                { id: 1, text: "1. Tanda petikan penutup tertinggal dalam arahan paparan teks." },
+                { id: 2, text: "2. Atur cara mengira harga selepas diskaun dengan menambah diskaun, bukannya menolaknya." },
+                { id: 3, text: "3. Atur cara cuba membahagikan suatu nombor dengan sifar ketika dilaksanakan." },
+                { id: 4, text: "4. Atur cara berjalan tanpa mesej ralat tetapi jumlah bil dikira secara salah." }
+            ];
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Pilih jenis ralat yang paling sesuai bagi setiap situasi berikut."
+                    </p>
+                    <div class="space-y-3">
+                        ${items.map(item => `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <span class="text-xs text-slate-300 font-medium">${item.text}</span>
+                                <select id="m8-select-${item.id}" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-sky-400 font-bold outline-none focus:border-sky-500">
+                                    <option value="">-- Pilih Jenis Ralat --</option>
+                                    ${errors.map(e => `
+                                        <option value="${e}" ${saved[item.id] === e ? 'selected' : ''}>${e}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- MISI 9: HEADING HTML --- */
+        function renderMisi9(container) {
+            const saved = APP_STATE.userAnswers[9] || { a: '', b: '', c: '', d: '' };
+            const headings = [
+                { label: 'A (Paling Besar)', tag: '<h1>Galeri Sains</h1>', id: 'a' },
+                { label: 'B (Besar)', tag: '<h2>Galeri Sains</h2>', id: 'b' },
+                { label: 'C (Sederhana)', tag: '<h3>Galeri Sains</h3>', id: 'c' },
+                { label: 'D (Paling Kecil)', tag: '<h4>Galeri Sains</h4>', id: 'd' }
+            ];
+            const options = ['<h1>Galeri Sains</h1>', '<h2>Galeri Sains</h2>', '<h3>Galeri Sains</h3>', '<h4>Galeri Sains</h4>'];
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Padankan paparan saiz tajuk A hingga D dengan tag HTML yang betul."
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${headings.map(h => `
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-sky-400">${h.label}</span>
+                                </div>
+                                <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-center">
+                                    ${h.id === 'a' ? '<span class="text-2xl font-extrabold text-slate-100">Galeri Sains</span>' : ''}
+                                    ${h.id === 'b' ? '<span class="text-xl font-bold text-slate-200">Galeri Sains</span>' : ''}
+                                    ${h.id === 'c' ? '<span class="text-base font-semibold text-slate-300">Galeri Sains</span>' : ''}
+                                    ${h.id === 'd' ? '<span class="text-xs font-normal text-slate-400">Galeri Sains</span>' : ''}
+                                </div>
+                                <select id="m9-select-${h.id}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-amber-400 outline-none focus:border-sky-500">
+                                    <option value="">-- Pilih Tag HTML --</option>
+                                    ${options.map(opt => `
+                                        <option value="${escapeHtml(opt)}" ${saved[h.id] === opt ? 'selected' : ''}>${escapeHtml(opt)}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- MISI 10: PULL-DOWN MENU HTML --- */
+        function renderMisi10(container) {
+            const saved = APP_STATE.userAnswers[10] || { i: '', ii: '', iii: '', iv: '' };
+            const isCabaran = (APP_STATE.mode === 'CABARAN');
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Lengkapkan kod HTML untuk menu pilihan warna kegemaran berikut."
+                    </p>
+
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 code-font text-xs space-y-2 text-slate-300">
+                        <div>&lt;html&gt;</div>
+                        <div>&lt;head&gt;&lt;title&gt;Warna Pilihan&lt;/title&gt;&lt;/head&gt;</div>
+                        <div>&lt;body&gt;</div>
+                        
+                        <div class="pl-4 space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sky-400 font-bold">(i)</span>
+                                ${renderM10Input('i', saved.i, isCabaran)}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sky-400 font-bold">(ii)</span>
+                                ${renderM10Input('ii', saved.ii, isCabaran)}
+                            </div>
+                            <div class="pl-4 text-slate-400">&lt;option value="Merah"&gt;Merah&lt;/option&gt;</div>
+                            <div class="flex items-center gap-2 pl-4">
+                                <span class="text-sky-400 font-bold">(iii)</span>
+                                ${renderM10Input('iii', saved.iii, isCabaran)}
+                            </div>
+                            <div class="pl-4 text-slate-400">&lt;option value="Biru"&gt;Biru&lt;/option&gt;</div>
+                            <div class="text-slate-400">&lt;/select&gt;</div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sky-400 font-bold">(iv)</span>
+                                ${renderM10Input('iv', saved.iv, isCabaran)}
+                            </div>
+                        </div>
+
+                        <div>&lt;/html&gt;</div>
+                    </div>
+
+                    <!-- Functional Live Preview Box -->
+                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                        <span class="text-xs text-emerald-400 font-bold flex items-center gap-1.5"><i data-lucide="play" class="w-4 h-4"></i> Pratonton Terbenam Menjadi:</span>
+                        <div id="m10-preview-box" class="p-4 bg-slate-950 rounded-lg border border-slate-800 text-slate-100 text-sm">
+                            <p class="mb-2 text-slate-300">Pilih warna:</p>
+                            <select class="bg-slate-800 border border-slate-700 text-white rounded px-3 py-1.5 text-xs">
+                                <option>Merah</option>
+                                <option>Hijau</option>
+                                <option>Biru</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderM10Input(key, val, isCabaran) {
+            const options = ['<p>Pilih warna:</p>', '<select>', '<option value="Hijau">Hijau</option>', '</body>'];
+            if (isCabaran) {
+                return `<input type="text" id="m10-input-${key}" value="${escapeHtml(val||'')}" placeholder="Taip kod HTML..." class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1 text-sky-300 font-mono text-xs outline-none">`;
+            } else {
+                return `
+                    <select id="m10-input-${key}" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1 text-sky-300 font-mono text-xs outline-none">
+                        <option value="">-- Pilih Potongan Kod --</option>
+                        ${options.map(opt => `<option value="${escapeHtml(opt)}" ${val === opt ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('')}
+                    </select>
+                `;
+            }
+        }
+
+        /* --- MISI 11: PENGIRAAN SAIZ FAIL IMEJ --- */
+        function renderMisi11(container) {
+            const saved = APP_STATE.userAnswers[11] || {};
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <p class="text-sm text-slate-300 bg-slate-800/60 p-4 rounded-xl border border-slate-700/80">
+                        "Sebuah poster hitam putih berbentuk imej skala kelabu mempunyai lebar 4 inci, panjang 3 inci dan resolusi 160 dpi. Anggap imej menggunakan 8 bit bagi setiap piksel dan saiz fail dikira tanpa pemampatan atau metadata."
+                    </p>
+
+                    <!-- BAHAGIAN A -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider">(a) Lengkapkan Hubungan Unit Data [2 Markah]</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div class="flex items-center gap-2">
+                                <span>i. 1 Bait =</span>
+                                <input type="number" id="m11-a-i" value="${saved.a_i||''}" placeholder="?" class="w-20 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-400 font-bold text-center">
+                                <span>Bit</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span>ii. 1 Kilobait =</span>
+                                <input type="number" id="m11-a-ii" value="${saved.a_ii||''}" placeholder="?" class="w-24 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-400 font-bold text-center">
+                                <span>Bait</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BAHAGIAN B -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
+                        <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider">(b) Jalan Kerja Pengiraan Saiz Fail Imej [8 Markah]</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                            <!-- Kumpulan 1 -->
+                            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-2">
+                                <span class="font-bold text-slate-300 block">1. Lebar Piksel:</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span>4 × 160 =</span>
+                                    <input type="number" id="m11-b-lebar" value="${saved.b_lebar||''}" placeholder="Piksel" class="w-28 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-bold">
+                                    <span>piksel</span>
+                                </div>
+                            </div>
+
+                            <!-- Kumpulan 2 -->
+                            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-2">
+                                <span class="font-bold text-slate-300 block">2. Panjang Piksel:</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span>3 × 160 =</span>
+                                    <input type="number" id="m11-b-panjang" value="${saved.b_panjang||''}" placeholder="Piksel" class="w-28 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-bold">
+                                    <span>piksel</span>
+                                </div>
+                            </div>
+
+                            <!-- Kumpulan 3 -->
+                            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-2 md:col-span-2">
+                                <span class="font-bold text-slate-300 block">3. Jumlah Piksel keseluruhan:</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span id="m11-show-dim">Lebar × Panjang =</span>
+                                    <input type="number" id="m11-b-jumlah-piksel" value="${saved.b_jumlah_piksel||''}" placeholder="Jumlah Piksel" class="w-36 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-bold">
+                                    <span>piksel</span>
+                                </div>
+                            </div>
+
+                            <!-- Kumpulan 4: Penukaran Unit -->
+                            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-3 md:col-span-2">
+                                <span class="font-bold text-slate-300 block">4. Penukaran Unit Saiz Fail:</span>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-24">a. Dalam Bit:</span>
+                                        <input type="number" id="m11-b-bit" value="${saved.b_bit||''}" placeholder="Bit" class="w-40 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-bold">
+                                        <span>bit</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-24">b. Dalam Bait:</span>
+                                        <input type="number" id="m11-b-bait" value="${saved.b_bait||''}" placeholder="Bait" class="w-40 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-bold">
+                                        <span>bait</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
+                                        <span class="w-24 font-bold text-sky-400">c. Akhir (KB):</span>
+                                        <input type="number" id="m11-b-kb" value="${saved.b_kb||''}" placeholder="KB" class="w-40 bg-slate-950 border border-sky-500 rounded px-2 py-1 text-sky-300 font-extrabold text-sm">
+                                        <span class="font-bold text-sky-400">KB</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- MISI 12: CARTA ALIR & RALAT SUHU --- */
+        function renderMisi12(container) {
+            const saved = APP_STATE.userAnswers[12] || {
+                line: '',
+                errorType: '',
+                slots: {}
+            };
+
+            const blockPool = [
+                { id: 'Mula', text: 'Mula' },
+                { id: 'Masukkan suhu', text: 'Masukkan suhu' },
+                { id: 'Suhu > 30?', text: 'Suhu > 30?' },
+                { id: 'Paparkan "Panas"', text: 'Paparkan "Panas"' },
+                { id: 'Suhu >= 24?', text: 'Suhu >= 24?' },
+                { id: 'Paparkan "Selesa"', text: 'Paparkan "Selesa"' },
+                { id: 'Paparkan "Sejuk"', text: 'Paparkan "Sejuk"' },
+                { id: 'Tamat', text: 'Tamat' }
+            ];
+
+            // Filter placed blocks
+            const placedValues = Object.values(saved.slots || {});
+            const unplacedBlocks = blockPool.filter(b => !placedValues.includes(b.text));
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <!-- SOALAN (a): Pengesanan Ralat -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider">(a) Kesan Ralat dalam Pseudokod Suhu [2 Markah]</h4>
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 code-font text-xs space-y-1 text-slate-300">
+                            <div>1  MULA</div>
+                            <div>2  MASUKKAN suhu</div>
+                            <div>3  JIKA suhu > 30</div>
+                            <div>4     PAPARKAN "Panas"</div>
+                            <div class="text-amber-400 font-bold">5  JIKA suhu >= 24</div>
+                            <div>6     PAPARKAN "Selesa"</div>
+                            <div>7  JIKA TIDAK</div>
+                            <div>8     PAPARKAN "Sejuk"</div>
+                            <div>9  TAMAT JIKA</div>
+                            <div>10 TAMAT</div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <label class="block text-slate-400 mb-1">Baris bermasalah (1-10):</label>
+                                <input type="number" id="m12-input-line" value="${saved.line||''}" placeholder="Cth: 5" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-slate-100 font-bold outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-slate-400 mb-1">Jenis Ralat:</label>
+                                <input type="text" id="m12-input-errortype" value="${escapeHtml(saved.errorType||'')}" placeholder="Cth: Ralat logik" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-slate-100 font-bold outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SOALAN (b): Carta Alir Interaktif -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <h4 class="text-xs font-bold text-sky-400 uppercase tracking-wider">(b) Lengkapkan Rangka Carta Alir [8 Markah]</h4>
+                            <button onclick="clearMisi12Slots()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-lg border border-slate-700">Kosongkan Susunan</button>
+                        </div>
+
+                        <!-- Unplaced Blocks Tray -->
+                        <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2">
+                            <span class="text-xs text-slate-400 font-semibold block">Dulang Blok Kad (Seret atau Ketik untuk Meletakkan):</span>
+                            <div class="flex flex-wrap gap-2" id="m12-tray">
+                                ${unplacedBlocks.map(b => `
+                                    <div draggable="true" ondragstart="dragM12(event, '${b.text}')" onclick="selectM12TrayBlock('${b.text}')"
+                                        class="px-3 py-1.5 bg-sky-500/20 border border-sky-500/40 hover:bg-sky-500/30 text-sky-200 text-xs font-bold rounded-lg cursor-grab active:cursor-grabbing transition shadow">
+                                        ${b.text}
+                                    </div>
+                                me`).join('')}
+                                ${unplacedBlocks.length === 0 ? '<span class="text-xs text-slate-600 italic">Semua blok telah diletakkan dalam carta alir.</span>' : ''}
+                            </div>
+                        </div>
+
+                        <!-- SVG Fixed Coordinate Layout Flowchart Diagram -->
+                        <div class="relative overflow-x-auto p-4 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-center">
+                            <svg width="600" height="680" viewBox="0 0 600 680" class="max-w-full h-auto">
+                                <defs>
+                                    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+                                    </marker>
+                                </defs>
+
+                                <!-- N1 -> N2 -->
+                                <line x1="300" y1="50" x2="300" y2="90" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+                                <!-- N2 -> N3 -->
+                                <line x1="300" y1="130" x2="300" y2="170" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+                                
+                                <!-- N3 (Decision 1) -> N4 (Ya - Left) -->
+                                <line x1="220" y1="200" x2="140" y2="200" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+                                <text x="170" y="190" fill="#f59e0b" font-size="12" font-weight="bold">Ya</text>
+
+                                <!-- N3 (Decision 1) -> N5 (Tidak - Down) -->
+                                <line x1="300" y1="230" x2="300" y2="280" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+                                <text x="310" y="255" fill="#f59e0b" font-size="12" font-weight="bold">Tidak</text>
+
+                                <!-- N5 (Decision 2) -> N6 (Ya - Down) -->
+                                <line x1="300" y1="340" x2="300" y2="390" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+                                <text x="310" y="365" fill="#f59e0b" font-size="12" font-weight="bold">Ya</text>
+
+                                <!-- N5 (Decision 2) -> N7 (Tidak - Right) -->
+                                <line x1="380" y1="310" x2="460" y2="310" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+                                <text x="410" y="300" fill="#f59e0b" font-size="12" font-weight="bold">Tidak</text>
+
+                                <!-- Merging lines to N8 -->
+                                <!-- N4 (Panas - Left Lane) down to merge line -->
+                                <line x1="90" y1="220" x2="90" y2="520" stroke="#38bdf8" stroke-width="2" />
+                                <line x1="90" y1="520" x2="300" y2="520" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N6 (Selesa - Center Lane) down to merge line -->
+                                <line x1="300" y1="430" x2="300" y2="520" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N7 (Sejuk - Right Lane) down to merge line -->
+                                <line x1="510" y1="330" x2="510" y2="520" stroke="#38bdf8" stroke-width="2" />
+                                <line x1="510" y1="520" x2="300" y2="520" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- Merge line arrow down to N8 (Tamat) -->
+                                <line x1="300" y1="520" x2="300" y2="570" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+                                <!-- N1: Terminator Top Center -->
+                                <rect id="node-N1" x="220" y="10" width="160" height="40" rx="20" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+                                
+                                <!-- N2: Input Center -->
+                                <polygon id="node-N2" points="230,90 390,90 370,130 210,130" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N3: Decision 1 Center -->
+                                <polygon id="node-N3" points="300,170 380,200 300,230 220,200" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N4: Output Panas Left -->
+                                <polygon id="node-N4" points="30,180 150,180 130,220 10,220" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N5: Decision 2 Center -->
+                                <polygon id="node-N5" points="300,280 380,310 300,340 220,310" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N6: Output Selesa Center -->
+                                <polygon id="node-N6" points="230,390 390,390 370,430 210,430" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N7: Output Sejuk Right -->
+                                <polygon id="node-N7" points="450,290 570,290 550,330 430,330" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- N8: Terminator Bottom Center -->
+                                <rect id="node-N8" x="220" y="570" width="160" height="40" rx="20" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+
+                                <!-- HTML Overlay Drop Slots -->
+                                <foreignObject x="0" y="0" width="600" height="680">
+                                    <div xmlns="http://www.w3.org/1999/xhtml" class="relative w-[600px] h-[680px]">
+                                        ${renderM12SlotHTML('N1', 220, 10, 160, 40, saved.slots.N1)}
+                                        ${renderM12SlotHTML('N2', 220, 90, 160, 40, saved.slots.N2)}
+                                        ${renderM12SlotHTML('N3', 220, 170, 160, 60, saved.slots.N3)}
+                                        ${renderM12SlotHTML('N4', 10, 180, 140, 40, saved.slots.N4)}
+                                        ${renderM12SlotHTML('N5', 220, 280, 160, 60, saved.slots.N5)}
+                                        ${renderM12SlotHTML('N6', 220, 390, 160, 40, saved.slots.N6)}
+                                        ${renderM12SlotHTML('N7', 430, 290, 140, 40, saved.slots.N7)}
+                                        ${renderM12SlotHTML('N8', 220, 570, 160, 40, saved.slots.N8)}
+                                    </div>
+                                </foreignObject>
+                            </svg>
+                        </div>
+
+                        <!-- Interactive Execution Simulation -->
+                        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+                            <span class="text-xs text-amber-400 font-bold flex items-center gap-1.5"><i data-lucide="play-circle" class="w-4 h-4"></i> Simulasi Carta Alir Berpandukan Suhu:</span>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs text-slate-300">Uji Suhu:</span>
+                                <button onclick="runM12Sim(23)" class="px-3 py-1 bg-sky-500/20 text-sky-300 border border-sky-500/40 rounded-lg text-xs font-bold hover:bg-sky-500/30">23°C (Sejuk)</button>
+                                <button onclick="runM12Sim(24)" class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-lg text-xs font-bold hover:bg-emerald-500/30">24°C (Selesa)</button>
+                                <button onclick="runM12Sim(30)" class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-lg text-xs font-bold hover:bg-emerald-500/30">30°C (Selesa)</button>
+                                <button onclick="runM12Sim(31)" class="px-3 py-1 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-lg text-xs font-bold hover:bg-rose-500/30">31°C (Panas)</button>
+                            </div>
+                            <div id="m12-sim-output" class="p-3 bg-slate-950 rounded-lg border border-slate-800 text-xs font-mono text-slate-400">
+                                Klik butang di atas untuk menjalankan animasi ujian carta alir.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderM12SlotHTML(slotId, x, y, width, height, currentVal) {
+            return `
+                <div style="position: absolute; left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px;"
+                    ondragover="allowDrop(event)" ondrop="dropM12(event, '${slotId}')" onclick="clickM12Slot('${slotId}')"
+                    class="flex items-center justify-center p-1 text-center cursor-pointer group">
+                    <div class="w-full h-full flex items-center justify-center rounded text-[11px] font-bold ${currentVal ? 'bg-sky-500/80 text-slate-950 shadow' : 'bg-slate-800/40 text-slate-500 border border-dashed border-slate-600 hover:border-sky-400'}">
+                        ${currentVal ? `<span>${currentVal}</span>` : '<span>Letak blok</span>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        let selectedM12Text = null;
+        function selectM12TrayBlock(txt) {
+            selectedM12Text = txt;
+            showToast(`Blok "${txt}" dipilih. Klik mana-mana sasaran pada carta alir.`);
+        }
+        function clickM12Slot(slotId) {
+            if (selectedM12Text) {
+                setM12SlotValue(slotId, selectedM12Text);
+                selectedM12Text = null;
+            } else {
+                // Clear slot if clicked
+                const saved = APP_STATE.userAnswers[12] || { slots: {} };
+                if (saved.slots && saved.slots[slotId]) {
+                    delete saved.slots[slotId];
+                    APP_STATE.userAnswers[12] = saved;
+                    renderMisi12(document.getElementById('mission-content-area'));
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        function dragM12(e, txt) { e.dataTransfer.setData('text/plain', txt); }
+        function dropM12(e, slotId) {
+            e.preventDefault();
+            const txt = e.dataTransfer.getData('text/plain');
+            if (txt) setM12SlotValue(slotId, txt);
+        }
+
+        function setM12SlotValue(slotId, txt) {
+            const saved = APP_STATE.userAnswers[12] || { slots: {} };
+            if (!saved.slots) saved.slots = {};
+            
+            // Remove text from other slot if present
+            for (let s in saved.slots) {
+                if (saved.slots[s] === txt) delete saved.slots[s];
+            }
+            saved.slots[slotId] = txt;
+            APP_STATE.userAnswers[12] = saved;
+            renderMisi12(document.getElementById('mission-content-area'));
+            lucide.createIcons();
+        }
+
+        function clearMisi12Slots() {
+            const saved = APP_STATE.userAnswers[12] || {};
+            saved.slots = {};
+            APP_STATE.userAnswers[12] = saved;
+            renderMisi12(document.getElementById('mission-content-area'));
+            lucide.createIcons();
+        }
+
+        /* --- SIMULASI CARTA ALIR (MISI 12) --- */
+        function runM12Sim(temp) {
+            const test = FLOWCHART_TESTS.find(t => t.temp === temp);
+            if (!test) return;
+
+            const outBox = document.getElementById('m12-sim-output');
+            outBox.innerText = `Menjalankan ujian untuk suhu ${temp}°C...`;
+
+            // Reset glow
+            FLOWCHART_GRAPH.nodes.forEach(n => {
+                const el = document.getElementById(`node-${n}`);
+                if (el) el.classList.remove('active-flow-node');
+            });
+
+            let step = 0;
+            const interval = setInterval(() => {
+                if (step < test.path.length) {
+                    const node = test.path[step];
+                    const el = document.getElementById(`node-${node}`);
+                    if (el) el.classList.add('active-flow-node');
+                    outBox.innerText = `Langkah ${step+1}: Melalui Nod ${node}...`;
+                    AudioFX.playClick();
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    outBox.innerHTML = `<span class="text-emerald-400 font-bold">Laluan Lengkap: ${test.path.join(' ➔ ')}</span><br><strong>Output Paparan: "${test.output}"</strong>`;
+                    AudioFX.playSuccess();
+                }
+            }, 600);
+        }
+
+        /* ==========================================================================
+           5. CHECKING & SCORING LOGIC (STRICT SCHEME RULES)
+           ========================================================================== */
+
+        function saveCurrentInputs() {
+            const mNum = APP_STATE.currentMission;
+            if (mNum === 1) {
+                const arr = [0,1,2,3].map(i => {
+                    const el = document.getElementById(`m1-input-${i}`);
+                    return el ? el.value.trim() : '';
+                });
+                APP_STATE.userAnswers[1] = arr;
+            } else if (mNum === 2) {
+                const obj = {};
+                ['a','b','c','d'].forEach(id => {
+                    const el = document.getElementById(`m2-input-${id}`);
+                    if (el) obj[id] = el.value.trim();
+                });
+                APP_STATE.userAnswers[2] = obj;
+            } else if (mNum === 4) {
+                const obj = {};
+                ['s1','s2','s3','s4'].forEach(id => {
+                    const el = document.getElementById(`m4-select-${id}`);
+                    if (el) obj[id] = el.value;
+                });
+                APP_STATE.userAnswers[4] = obj;
+            } else if (mNum === 7) {
+                const obj = {};
+                ['plus','minus','multiply','divide'].forEach(id => {
+                    const el = document.getElementById(`m7-input-${id}`);
+                    if (el) obj[id] = el.value.trim();
+                });
+                APP_STATE.userAnswers[7] = obj;
+            } else if (mNum === 8) {
+                const obj = {};
+                [1,2,3,4].forEach(id => {
+                    const el = document.getElementById(`m8-select-${id}`);
+                    if (el) obj[id] = el.value;
+                });
+                APP_STATE.userAnswers[8] = obj;
+            } else if (mNum === 9) {
+                const obj = {};
+                ['a','b','c','d'].forEach(id => {
+                    const el = document.getElementById(`m9-select-${id}`);
+                    if (el) obj[id] = el.value;
+                });
+                APP_STATE.userAnswers[9] = obj;
+            } else if (mNum === 10) {
+                const obj = {};
+                ['i','ii','iii','iv'].forEach(id => {
+                    const el = document.getElementById(`m10-input-${id}`);
+                    if (el) obj[id] = el.value.trim();
+                });
+                APP_STATE.userAnswers[10] = obj;
+            } else if (mNum === 11) {
+                const obj = {
+                    a_i: document.getElementById('m11-a-i')?.value.trim() || '',
+                    a_ii: document.getElementById('m11-a-ii')?.value.trim() || '',
+                    b_lebar: document.getElementById('m11-b-lebar')?.value.trim() || '',
+                    b_panjang: document.getElementById('m11-b-panjang')?.value.trim() || '',
+                    b_jumlah_piksel: document.getElementById('m11-b-jumlah-piksel')?.value.trim() || '',
+                    b_bit: document.getElementById('m11-b-bit')?.value.trim() || '',
+                    b_bait: document.getElementById('m11-b-bait')?.value.trim() || '',
+                    b_kb: document.getElementById('m11-b-kb')?.value.trim() || ''
+                };
+                APP_STATE.userAnswers[11] = obj;
+            } else if (mNum === 12) {
+                const saved = APP_STATE.userAnswers[12] || {};
+                saved.line = document.getElementById('m12-input-line')?.value.trim() || '';
+                saved.errorType = document.getElementById('m12-input-errortype')?.value.trim() || '';
+                APP_STATE.userAnswers[12] = saved;
+            }
+            saveLocalProgress();
+        }
+
+        function checkCurrentMission() {
+            saveCurrentInputs();
+            const mNum = APP_STATE.currentMission;
+            let score = 0;
+
+            // Mark first attempt recorded
+            if (!APP_STATE.firstAttempts[mNum]) {
+                APP_STATE.firstAttempts[mNum] = true;
+            }
+
+            switch (mNum) {
+                case 1: score = checkMisi1(); break;
+                case 2: score = checkMisi2(); break;
+                case 3: score = checkMisi3(); break;
+                case 4: score = checkMisi4(); break;
+                case 5: score = checkMisi5(); break;
+                case 6: score = checkMisi6(); break;
+                case 7: score = checkMisi7(); break;
+                case 8: score = checkMisi8(); break;
+                case 9: score = checkMisi9(); break;
+                case 10: score = checkMisi10(); break;
+                case 11: score = checkMisi11(); break;
+                case 12: score = checkMisi12(); break;
+            }
+
+            APP_STATE.scores[mNum] = score;
+            saveLocalProgress();
+            renderNavigationGrid();
+            loadMission(mNum);
+
+            if (score === QUESTION_DATA[mNum].maxScore) {
+                AudioFX.playSuccess();
+                showToast(`Tahniah! Anda mendapat markah penuh ${score}/${score}!`);
+            } else {
+                AudioFX.playError();
+                showToast(`Semakan selesai: ${score} / ${QUESTION_DATA[mNum].maxScore} markah.`);
+            }
+        }
+
+        /* --- CHECKERS --- */
+        function checkMisi1() {
+            const userInputs = APP_STATE.userAnswers[1] || [];
+            const key = ANSWER_KEY[1];
+            let score = 0;
+            let missingTeknikWord = false;
+            const seen = new Set();
+
+            userInputs.forEach(inp => {
+                const norm = inp.toLowerCase().replace(/\s+/g, ' ').trim();
+                if (!norm) return;
+
+                if (!norm.startsWith('teknik')) {
+                    missingTeknikWord = true;
+                }
+
+                if (key.includes(norm) && !seen.has(norm)) {
+                    seen.add(norm);
+                    score++;
+                }
+            });
+
+            const fb = document.getElementById('m1-feedback');
+            if (fb) {
+                if (missingTeknikWord) {
+                    fb.innerText = 'Peringatan: Lengkapkan nama dengan perkataan "Teknik" di hadapan.';
+                    fb.classList.remove('hidden');
+                } else {
+                    fb.classList.add('hidden');
+                }
+            }
+
+            return score;
+        }
+
+        function checkMisi2() {
+            const inp = APP_STATE.userAnswers[2] || {};
+            const key = ANSWER_KEY[2];
+            let score = 0;
+
+            ['a','b','c','d'].forEach(k => {
+                if (parseInt(inp[k]) === key[k]) score++;
+            });
+            return score;
+        }
+
+        function checkMisi3() {
+            const inp = APP_STATE.userAnswers[3] || { benar: [], palsu: [] };
+            const key = ANSWER_KEY[3];
+            let score = 0;
+
+            [1,2,3,4].forEach(id => {
+                const isTrueInKey = key[id];
+                if (isTrueInKey && (inp.benar || []).includes(id)) score++;
+                if (!isTrueInKey && (inp.palsu || []).includes(id)) score++;
+            });
+            return score;
+        }
+
+        function checkMisi4() {
+            const inp = APP_STATE.userAnswers[4] || {};
+            const key = ANSWER_KEY[4];
+            let score = 0;
+
+            ['s1','s2','s3','s4'].forEach(k => {
+                if (inp[k] === key[k]) score++;
+            });
+            return score;
+        }
+
+        function checkMisi5() {
+            const userArr = APP_STATE.userAnswers[5] || [];
+            const key = ANSWER_KEY[5]; // ['D','C','B','A']
+            let score = 0;
+
+            userArr.forEach((item, index) => {
+                if (item === key[index]) score++;
+            });
+            return score;
+        }
+
+        function checkMisi6() {
+            const userArr = APP_STATE.userAnswers[6] || [];
+            const key = ANSWER_KEY[6]; // ['S','Q','P','R']
+            let score = 0;
+
+            userArr.forEach((item, index) => {
+                if (item === key[index]) score++;
+            });
+
+            // Trigger Animation if score is 4
+            if (score === 4) {
+                const animArea = document.getElementById('m6-anim-area');
+                const counterDisplay = document.getElementById('m6-counter-display');
+                const animStatus = document.getElementById('m6-anim-status');
+                if (animArea) {
+                    animArea.classList.remove('hidden');
+                    let count = 1;
+                    const interval = setInterval(() => {
+                        if (count <= 5) {
+                            counterDisplay.innerText = count;
+                            animStatus.innerText = `S -> Q -> P (${count}) -> R`;
+                            AudioFX.playClick();
+                            count++;
+                        } else {
+                            clearInterval(interval);
+                            animStatus.innerText = 'Q (Pembilang > 5) -> U (Tamat)';
+                        }
+                    }, 800);
+                }
+            }
+            return score;
+        }
+
+        function checkMisi7() {
+            const inp = APP_STATE.userAnswers[7] || {};
+            const key = ANSWER_KEY[7];
+            let score = 0;
+
+            if (inp.plus === key.plus) score++;
+            if (inp.minus === key.minus) score++;
+            if (inp.multiply === key.multiply) score++;
+            if (inp.divide === key.divide) score++;
+            return score;
+        }
+
+        function checkMisi8() {
+            const inp = APP_STATE.userAnswers[8] || {};
+            const key = ANSWER_KEY[8];
+            let score = 0;
+
+            [1,2,3,4].forEach(id => {
+                if (inp[id] === key[id]) score++;
+            });
+            return score;
+        }
+
+        function checkMisi9() {
+            const inp = APP_STATE.userAnswers[9] || {};
+            const key = ANSWER_KEY[9];
+            let score = 0;
+
+            ['a','b','c','d'].forEach(k => {
+                if (inp[k] === key[k]) score++;
+            });
+            return score;
+        }
+
+        function checkMisi10() {
+            const inp = APP_STATE.userAnswers[10] || {};
+            const key = ANSWER_KEY[10];
+            let score = 0;
+
+            ['i','ii','iii','iv'].forEach(k => {
+                const userVal = (inp[k] || '').replace(/\s+/g, ' ').trim().toLowerCase();
+                const keyVal = key[k].replace(/\s+/g, ' ').trim().toLowerCase();
+                if (userVal === keyVal) score++;
+            });
+
+            // Show functional preview
+            const previewBox = document.getElementById('m10-preview-box');
+            if (previewBox) {
+                previewBox.innerHTML = `
+                    <div class="space-y-2">
+                        ${inp.i || ''}
+                        ${inp.ii || ''}
+                        <option value="Merah">Merah</option>
+                        ${inp.iii || ''}
+                        <option value="Biru">Biru</option>
+                        </select>
+                        ${inp.iv || ''}
+                    </div>
+                `;
+            }
+            return score;
+        }
+
+        function checkMisi11() {
+            const inp = APP_STATE.userAnswers[11] || {};
+            const key = ANSWER_KEY[11];
+            let score = 0;
+
+            // (a) i & ii (2 marks)
+            if (parseInt(inp.a_i) === key.a_i) score += 1;
+            if (parseInt(inp.a_ii) === key.a_ii) score += 1;
+
+            // (b) Working marks (8 marks max)
+            // Lebar: 4 * 160 = 640 (2 marks)
+            if (parseInt(inp.b_lebar) === key.b_lebar) score += 2;
+            
+            // Panjang: 3 * 160 = 480 (2 marks)
+            if (parseInt(inp.b_panjang) === key.b_panjang) score += 2;
+
+            // Jumlah Piksel: 640 * 480 = 307200 (2 marks)
+            if (parseInt(inp.b_jumlah_piksel) === key.b_jumlah_piksel) score += 2;
+
+            // Penukaran Saiz Fail: 300 KB (2 marks)
+            if (parseInt(inp.b_kb) === key.b_kb) score += 2;
+
+            return Math.min(score, 10);
+        }
+
+        function checkMisi12() {
+            const inp = APP_STATE.userAnswers[12] || { slots: {} };
+            const key = ANSWER_KEY[12];
+            let score = 0;
+
+            // (a) Line & Error Type (2 marks)
+            if (parseInt(inp.line) === key.line) score += 1;
+            
+            const errNorm = (inp.errorType || '').toLowerCase();
+            if (errNorm.includes('logik')) {
+                score += 1;
+            } else if (errNorm.length > 0) {
+                // Teacher review flag if identified syntax/structure reasoning
+                APP_STATE.teacherReviewItems[12] = "Misi 12(a): Semakan manual guru untuk justifikasi ralat penutupan JIKA.";
+            }
+
+            // (b) Flowchart Slot Checking (7 marks for structure)
+            const slots = inp.slots || {};
+            let correctSlotsCount = 0;
+
+            for (let node in key.flowchartSlots) {
+                if (slots[node] === key.flowchartSlots[node]) {
+                    correctSlotsCount++;
+                }
+            }
+
+            // Convert correct slots to 7 max marks
+            let slotScore = Math.floor((correctSlotsCount / 8) * 7);
+            score += slotScore;
+
+            // Assisted Mark (1 mark) if all 8 slots filled
+            if (Object.keys(slots).length === 8) {
+                score += 1;
+                APP_STATE.assistedItems[12] = true;
+            }
+
+            return Math.min(score, 10);
+        }
+
+        function revealSkemaAnswer() {
+            const mNum = APP_STATE.currentMission;
+            APP_STATE.assistedItems[mNum] = true;
+
+            if (mNum === 1) APP_STATE.userAnswers[1] = ANSWER_KEY[1];
+            if (mNum === 2) APP_STATE.userAnswers[2] = ANSWER_KEY[2];
+            if (mNum === 3) APP_STATE.userAnswers[3] = { benar: [1, 2, 4], palsu: [3] };
+            if (mNum === 4) APP_STATE.userAnswers[4] = ANSWER_KEY[4];
+            if (mNum === 5) APP_STATE.userAnswers[5] = [...ANSWER_KEY[5]];
+            if (mNum === 6) APP_STATE.userAnswers[6] = [...ANSWER_KEY[6]];
+            if (mNum === 7) APP_STATE.userAnswers[7] = ANSWER_KEY[7];
+            if (mNum === 8) APP_STATE.userAnswers[8] = ANSWER_KEY[8];
+            if (mNum === 9) APP_STATE.userAnswers[9] = ANSWER_KEY[9];
+            if (mNum === 10) APP_STATE.userAnswers[10] = ANSWER_KEY[10];
+            if (mNum === 11) APP_STATE.userAnswers[11] = ANSWER_KEY[11];
+            if (mNum === 12) {
+                APP_STATE.userAnswers[12] = {
+                    line: 5,
+                    errorType: 'Ralat logik',
+                    slots: { ...ANSWER_KEY[12].flowchartSlots }
+                };
+            }
+
+            saveLocalProgress();
+            loadMission(mNum);
+            showToast('Jawapan skema dibuka. Misi ini ditandakan sebagai Latihan Berbantu.');
+        }
+
+        function resetCurrentMission() {
+            const mNum = APP_STATE.currentMission;
+            delete APP_STATE.userAnswers[mNum];
+            delete APP_STATE.scores[mNum];
+            saveLocalProgress();
+            renderNavigationGrid();
+            loadMission(mNum);
+            showToast('Misi ди-reset ke keadaan asal.');
+        }
+
+        /* ==========================================================================
+           6. REPORT CARD GENERATION & PRINTING
+           ========================================================================== */
+
+        function showReportCard() {
+            saveCurrentInputs();
+            calculateGlobalScore();
+
+            document.getElementById('mission-card').classList.add('hidden');
+            const reportSec = document.getElementById('report-card-section');
+            reportSec.classList.remove('hidden');
+
+            let totalB = 0;
+            for (let i = 1; i <= 10; i++) totalB += (APP_STATE.scores[i] || 0);
+
+            let totalC = 0;
+            for (let i = 11; i <= 12; i++) totalC += (APP_STATE.scores[i] || 0);
+
+            const totalScore = totalB + totalC;
+
+            reportSec.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex flex-wrap justify-between items-center border-b border-slate-800 pb-4 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-100">LAPORAN PRESTASI MURID</h2>
+                            <p class="text-xs text-slate-400">Misi ASK Tingkatan 1 — Keputusankeseluruhan</p>
+                        </div>
+                        <div class="flex items-center gap-2 no-print">
+                            <button onclick="window.print()" class="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-2 shadow">
+                                <i data-lucide="printer" class="w-4 h-4"></i> Cetak Laporan
+                            </button>
+                            <button onclick="loadMission(1)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl flex items-center gap-2 border border-slate-700">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali Ke Misi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block mb-1">Bahagian B (Misi 1-10)</span>
+                            <span class="text-2xl font-black text-sky-400">${totalB} / 40</span>
+                        </div>
+                        <div class="p-4 bg-slate-950 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block mb-1">Bahagian C (Misi 11-12)</span>
+                            <span class="text-2xl font-black text-emerald-400">${totalC} / 20</span>
+                        </div>
+                        <div class="p-4 bg-slate-950 rounded-xl border border-sky-500/50 bg-sky-500/5">
+                            <span class="text-xs text-sky-300 block mb-1 font-semibold">Jumlah Keseluruhan</span>
+                            <span class="text-3xl font-black text-amber-400">${totalScore} / 60</span>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left text-slate-300 border-collapse">
+                            <thead class="bg-slate-950 text-slate-400 uppercase font-bold border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">Misi</th>
+                                    <th class="p-3">Tajuk Soalan</th>
+                                    <th class="p-3 text-center">Markah</th>
+                                    <th class="p-3 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 bg-slate-900/50">
+                                ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m => {
+                                    const max = QUESTION_DATA[m].maxScore;
+                                    const score = APP_STATE.scores[m] !== undefined ? APP_STATE.scores[m] : 0;
+                                    const isAssisted = APP_STATE.assistedItems[m];
+                                    const isReview = APP_STATE.teacherReviewItems[m];
+
+                                    return `
+                                        <tr>
+                                            <td class="p-3 font-bold text-sky-400">Misi ${m}</td>
+                                            <td class="p-3">${QUESTION_DATA[m].title}</td>
+                                            <td class="p-3 text-center font-bold ${score === max ? 'text-emerald-400' : 'text-amber-400'}">${score} / ${max}</td>
+                                            <td class="p-3 text-center">
+                                                ${isAssisted ? '<span class="px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded border border-amber-500/30">Latihan Berbantu</span>' : '<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30">Cabaran Mandiri</span>'}
+                                                ${isReview ? '<br><span class="text-[10px] text-indigo-400">Perlu Semakan Guru</span>' : ''}
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Notes for Teacher -->
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1">
+                        <strong class="text-slate-200 block">Nota Semakan Guru:</strong>
+                        <p>• Carta alir Misi 12 menggunakan rangka siap. 1 markah sambungan dikategorikan sebagai markah berbantu.</p>
+                        <p>• Semua jawapan disemak menggunakan skema pemarkahan tetap KSSM ASK Tingkatan 1 tanpa kebergantungan AI.</p>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        /* ==========================================================================
+           7. LOCAL STORAGE & UTILITY HELPERS
+           ========================================================================== */
+
+        function saveLocalProgress() {
+            try {
+                localStorage.setItem('MISI_ASK_T1_STATE', JSON.stringify(APP_STATE));
+            } catch (e) {
+                console.warn('Storage disabled');
+            }
+        }
+
+        function loadLocalProgress() {
+            try {
+                const data = localStorage.getItem('MISI_ASK_T1_STATE');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    Object.assign(APP_STATE, parsed);
+                    document.getElementById('display-username').innerText = APP_STATE.username;
+                }
+            } catch (e) {
+                console.warn('Storage load failed');
+            }
+        }
+
+        function changeUsername() {
+            const name = prompt('Masukkan nama anda:', APP_STATE.username);
+            if (name && name.trim().length > 0) {
+                APP_STATE.username = name.trim();
+                document.getElementById('display-username').innerText = APP_STATE.username;
+                saveLocalProgress();
+            }
+        }
+
+        function confirmResetAll() {
+            openModal('Mula Semula Kemajuan', 'Adakah anda pasti untuk memadam semua rekod jawapan dan markah?', () => {
+                localStorage.removeItem('MISI_ASK_T1_STATE');
+                location.reload();
+            });
+        }
+
+        function openModal(title, body, confirmCallback) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerText = body;
+            const btn = document.getElementById('modal-confirm-btn');
+            btn.onclick = () => {
+                closeModal();
+                confirmCallback();
+            };
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('global-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'global-toast';
+                toast.className = 'fixed bottom-5 right-5 z-50 bg-sky-600 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold transition-opacity duration-300 opacity-0 pointer-events-none';
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 3000);
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
